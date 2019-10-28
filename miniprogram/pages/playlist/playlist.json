@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "PlayList": "/components/playlist/playlist"
+  },
+  "enablePullDownRefresh": true
+}
