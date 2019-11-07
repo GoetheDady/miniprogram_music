@@ -6,15 +6,7 @@ Page({
    * 页面的初始数据
    */
   data: {
-    swiperImgUrls: [{
-      url: 'http://p1.music.126.net/iThtqS-EfKBLvsN5uhaF9g==/109951164453784664.jpg'
-    }, {
-      url: 'http://p1.music.126.net/xn1JF3EOyEXFhtb_MrfaEw==/109951164453311336.jpg'
-    }, {
-      url: 'http://p1.music.126.net/4D4PYTX_XcEPZQeQf5554w==/109951164453320221.jpg'
-    }, {
-      url: 'http://p1.music.126.net/0zJcnaSOJGQYfQ_bkPYH0g==/109951164453790015.jpg'
-    }],
+    swiperImgUrls: [],
     playlist: []
   },
 
@@ -22,7 +14,8 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function(options) {
-    this._getPlaylist()
+    this._getPlaylist();
+    this._getBannerList();
   },
 
   /**
@@ -68,7 +61,7 @@ Page({
    * 页面上拉触底事件的处理函数
    */
   onReachBottom: function() {
-    this._getPlaylist()
+    this._getPlaylist();
   },
 
   /**
@@ -85,10 +78,11 @@ Page({
       name: 'music',
       data: {
         start: this.data.playlist.length,
-        count: MAX_LIMIT
+        count: MAX_LIMIT,
+        $url: 'playlist'
       }
     }).then(res => {
-      console.log(res)
+      // console.log(res)
       wx.stopPullDownRefresh();
       wx.hideLoading();
       this.setData({
@@ -96,6 +90,19 @@ Page({
           ...this.data.playlist,
           ...res.result.data
         ]
+      })
+    })
+  },
+  _getBannerList() {
+    console.log(123)
+    wx.cloud.callFunction({
+      name: 'music',
+      data: {
+        $url: 'bannerList'
+      }
+    }).then(res => {
+      this.setData({
+        swiperImgUrls: res.result.banners
       })
     })
   }
