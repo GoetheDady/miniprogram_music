@@ -1,13 +1,15 @@
 // pages/player/player.js
 let musicList = [];
-let nowPlayingIndex = ''; // 表示正在播放歌曲的index
+let nowPlayingIndex = 0; // 表示正在播放歌曲的index
+const backgroundAudioManager = wx.getBackgroundAudioManager(); 
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    picUrl: ''
+    picUrl: '',
+    isPlaying: false,
   },
 
   /**
@@ -17,18 +19,70 @@ Page({
     console.log(options)
     nowPlayingIndex = options.index;
     musicList = wx.getStorageSync('musiclist')
-    console.log(this._loadMusicDetail())
+    this._loadMusicDetail(options.musicId)
   },
 
-  _loadMusicDetail() {
+  _loadMusicDetail(musicId) {
+    backgroundAudioManager.pause();
     const music = musicList[nowPlayingIndex];
     console.log(music)
     wx.setNavigationBarTitle({
       title: music.name,
     })
     this.setData({
-      picUrl: music.al.picUrl
+      picUrl: music.al.picUrl,
+      isPlaying: false,
+    }, () => {
+      wx.showLoading({
+        title: '歌曲加载中。。。',
+      })
+      wx.cloud.callFunction({
+        name: 'music',
+        data: {
+          musicId,
+          $url: 'musicUrl',
+        }
+      }).then(res => {
+        const { result: { data } } = res;
+        backgroundAudioManager.src = data[0].url;
+        backgroundAudioManager.title = music.name;
+        backgroundAudioManager.coverImgUrl = music.al.picUrl;
+        backgroundAudioManager.singer = music.ar[0].name;
+        backgroundAudioManager.epname = music.al.name;
+        this.setData({
+          isPlaying: true
+        }, () => {
+          wx.hideLoading()
+        })
+      })
     })
+  },
+
+  togglePlaying() {
+    if (this.data.isPlaying) {
+      backgroundAudioManager.pause();
+    } else {
+      backgroundAudioManager.play();
+    }
+    this.setData({
+      isPlaying: !this.data.isPlaying
+    })
+  },
+
+  onPrev() {
+    nowPlayingIndex--;
+    if (nowPlayingIndex < 0) {
+      nowPlayingIndex = musicList.length - 1
+    }
+    this._loadMusicDetail(musicList[nowPlayingIndex].id)
+  },
+
+  onNext() {
+    nowPlayingIndex++;
+    if (nowPlayingIndex === musicList.length) {
+      nowPlayingIndex = 0
+    }
+    this._loadMusicDetail(musicList[nowPlayingIndex].id)
   },
 
   /**

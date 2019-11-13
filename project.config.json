@@ -42,6 +42,13 @@
 					"name": "db guide",
 					"pathName": "pages/databaseGuide/databaseGuide",
 					"query": ""
+				},
+				{
+					"id": 1,
+					"name": "pages/player/player",
+					"pathName": "pages/player/player",
+					"query": "musicId=1396973729&index=3",
+					"scene": null
 				}
 			]
 		}
